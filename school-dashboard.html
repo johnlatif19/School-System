@@ -26,6 +26,20 @@
     </style>
 </head>
 <body>
+    <div id="editBox" style="display:none;position:fixed;top:10%;right:10%;left:10%;background:white;padding:20px;border-radius:15px;box-shadow:0 0 20px rgba(0,0,0,0.3)">
+    <h2>تعديل بيانات الطالب</h2>
+
+    <input id="nationalId" placeholder="الرقم القومي"><br>
+    <input id="name" placeholder="الاسم الكامل"><br>
+    <input id="email" placeholder="البريد الإلكتروني"><br>
+    <input id="password" placeholder="كلمة المرور (اختياري)"><br>
+    <input id="className" placeholder="الصف الدراسي"><br>
+    <input id="parentPhone" placeholder="رقم ولي الأمر"><br>
+
+    <br>
+    <button onclick="saveEdit()">حفظ</button>
+    <button onclick="closeEdit()" style="background:#e74c3c">إغلاق</button>
+</div>
     <div class="container">
         <div class="header">
             <h1>🏫 لوحة تحكم المدرسة</h1>
@@ -68,6 +82,8 @@
                  actions.innerHTML = `
                    <button onclick="mark('${s.id}','present')">حضور</button>
                    <button onclick="mark('${s.id}','absent')">غياب</button>
+                   <button onclick="mark('${s.id}','present')">حضور</button>
+                   <button style="background:#f39c12" onclick="openEdit('${s.id}')">تعديل</button>
                    <button style="background:#e74c3c" onclick="dismiss('${s.id}')">فصل الطالب</button>
                    <button style="background:#27ae60" onclick="reinstate('${s.id}')">إعادة قيد</button>
 `;
@@ -147,6 +163,63 @@ async function mark(studentId, status) {
 
     if (data.success) {
         alert('تم فصل الطالب');
+        fetchData();
+    } else {
+        alert(data.error);
+    }
+}
+
+let currentStudentId = null;
+
+async function openEdit(id) {
+    currentStudentId = id;
+
+    const res = await fetch('/api/admin/students', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const data = await res.json();
+    const student = data.students.find(s => s.id === id);
+
+    if (!student) return;
+
+    document.getElementById('nationalId').value = student.nationalId || '';
+    document.getElementById('name').value = student.name || '';
+    document.getElementById('email').value = student.email || '';
+    document.getElementById('className').value = student.className || '';
+    document.getElementById('parentPhone').value = student.parentPhone || '';
+
+    document.getElementById('editBox').style.display = 'block';
+}
+
+function closeEdit() {
+    document.getElementById('editBox').style.display = 'none';
+}
+
+async function saveEdit() {
+    const body = {
+        nationalId: document.getElementById('nationalId').value,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        className: document.getElementById('className').value,
+        parentPhone: document.getElementById('parentPhone').value
+    };
+
+    const res = await fetch(`/api/admin/student/${currentStudentId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        alert('تم التعديل بنجاح');
+        closeEdit();
         fetchData();
     } else {
         alert(data.error);
