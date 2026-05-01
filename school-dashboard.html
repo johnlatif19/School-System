@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المدرسة</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .stat-number { font-size: 36px; font-weight: bold; color: #3498db; }
+        .section { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 20px; color: #2c3e50; border-right: 4px solid #3498db; padding-right: 15px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #ddd; }
+        th { background: #3498db; color: white; }
+        .present { color: #27ae60; font-weight: bold; }
+        .absent { color: #e74c3c; font-weight: bold; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        @media (max-width: 768px) { table { font-size: 12px; } .stats { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏫 لوحة تحكم المدرسة</h1>
+            <button class="logout-btn" onclick="logout()">تسجيل خروج</button>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="section">
+            <h2>📚 قائمة الطلاب</h2>
+            <table id="studentsTable"><thead><tr><th>الرقم</th><th>الاسم</th><th>البريد</th><th>الصف</th></tr></thead><tbody id="studentsBody"></tbody></table>
+        </div>
+        <div class="section">
+            <h2>📊 سجل الحضور والغياب</h2>
+            <table id="attendanceTable"><thead><tr><th>الطالب</th><th>التاريخ</th><th>الحالة</th><th>الملاحظة</th></tr></thead><tbody id="attendanceBody"></tbody></table>
+        </div>
+    </div>
+    <script>
+        const token = localStorage.getItem('adminToken');
+        if (!token) window.location.href = '/admin-login.html';
+
+        async function fetchData() {
+            const studentsRes = await fetch('/api/admin/students', { headers: { 'Authorization': `Bearer ${token}` } });
+            const studentsData = await studentsRes.json();
+            if (studentsData.success) {
+                const tbody = document.getElementById('studentsBody');
+                tbody.innerHTML = '';
+                studentsData.students.forEach(s => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = s.id;
+                    row.insertCell(1).innerHTML = s.name;
+                    row.insertCell(2).innerHTML = s.email;
+                    row.insertCell(3).innerHTML = s.className;
+                });
+                document.getElementById('stats').innerHTML = `<div class="stat-card"><div class="stat-number">${studentsData.students.length}</div><div>عدد الطلاب</div></div>`;
+            }
+            const attendanceRes = await fetch('/api/admin/attendance', { headers: { 'Authorization': `Bearer ${token}` } });
+            const attendanceData = await attendanceRes.json();
+            if (attendanceData.success) {
+                const tbody = document.getElementById('attendanceBody');
+                tbody.innerHTML = '';
+                attendanceData.attendance.forEach(a => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = a.studentId;
+                    row.insertCell(1).innerHTML = a.date;
+                    row.insertCell(2).innerHTML = `<span class="${a.status}">${a.status === 'present' ? '✅ حضور' : '❌ غياب'}</span>`;
+                    row.insertCell(3).innerHTML = a.note || '-';
+                });
+            }
+        }
+        function logout() { localStorage.removeItem('adminToken'); window.location.href = '/admin-login.html'; }
+        fetchData();
+    </script>
+</body>
+</html>
