@@ -153,6 +153,50 @@ app.post('/api/attendance', verifyToken, async (req, res) => {
   }
 });
 
+app.post('/api/student/reinstate', verifyToken, async (req, res) => {
+  const { studentId } = req.body;
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'غير مصرح' });
+  }
+
+  try {
+    const studentRef = db.collection('students').doc(studentId);
+    const studentDoc = await studentRef.get();
+
+    if (!studentDoc.exists) {
+      return res.status(404).json({ error: 'الطالب غير موجود' });
+    }
+
+    const student = studentDoc.data();
+
+    await studentRef.update({
+      status: 'active'
+    });
+
+    // إرسال إيميل إعادة القيد
+    const parentQuery = await db.collection('parents')
+      .where('phone', '==', student.parentPhone)
+      .get();
+
+    if (!parentQuery.empty) {
+      const parent = parentQuery.docs[0].data();
+
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: parent.email,
+        subject: `إعادة قيد الطالب ${student.name}`,
+        text: `تم إعادة قيد الطالب ${student.name} وعودته للمدرسة`
+      });
+    }
+
+    res.json({ success: true, message: 'تم إعادة قيد الطالب' });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/student/me', verifyToken, async (req, res) => {
   try {
     const studentDoc = await db.collection('students').doc(req.user.id).get();
