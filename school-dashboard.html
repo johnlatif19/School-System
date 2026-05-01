@@ -68,14 +68,9 @@
                  actions.innerHTML = `
                    <button onclick="mark('${s.id}','present')">حضور</button>
                    <button onclick="mark('${s.id}','absent')">غياب</button>
+                   <button style="background:#e74c3c" onclick="dismiss('${s.id}')">فصل الطالب</button>
                      `;
                 });
-                const actions = row.insertCell(4);
-                 actions.innerHTML = `
-                  <button onclick="mark('${s.id}','present')">حضور</button>
-                  <button onclick="mark('${s.id}','absent')">غياب</button>
-                  <button style="background:#e74c3c" onclick="dismiss('${s.id}')">فصل الطالب</button>
-                     `;
                 document.getElementById('stats').innerHTML = `<div class="stat-card"><div class="stat-number">${studentsData.students.length}</div><div>عدد الطلاب</div></div>`;
             }
             const attendanceRes = await fetch('/api/admin/attendance', { headers: { 'Authorization': `Bearer ${token}` } });
