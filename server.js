@@ -343,6 +343,44 @@ app.post('/api/admin/login', (req, res) => {
   }
 });
 
+app.put('/api/admin/student/:id', verifyToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'غير مصرح' });
+  }
+
+  try {
+    const studentId = req.params.id;
+    const {
+      nationalId,
+      name,
+      email,
+      password,
+      className,
+      parentPhone
+    } = req.body;
+
+    const updateData = {
+      nationalId,
+      name,
+      email,
+      className,
+      parentPhone
+    };
+
+    // لو تم تغيير الباسورد
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    await db.collection('students').doc(studentId).update(updateData);
+
+    res.json({ success: true, message: 'تم تحديث بيانات الطالب' });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ============= API جلب كل الطلاب للأدمن =============
 app.get('/api/admin/students', verifyToken, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'غير مصرح' });
