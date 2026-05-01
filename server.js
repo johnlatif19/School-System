@@ -120,7 +120,7 @@ app.post('/api/parent/register', async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
     await db.collection('parents').doc(email).set({
-      email, password: hashedPassword, name, phone, studentIds, createdAt: new Date()
+      email, password, name, phone, studentIds, createdAt: new Date()
     });
     res.json({ success: true, message: 'تم إنشاء حساب ولي الأمر' });
   } catch (error) {
