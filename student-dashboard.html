@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الطالب - نظام المدرسة</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 16px; }
+        .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        h2 { color: #333; margin-bottom: 20px; border-right: 4px solid #667eea; padding-right: 15px; }
+        .attendance-btn { background: #4CAF50; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; margin-left: 10px; }
+        .absent-btn { background: #f44336; }
+        .note-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #ddd; }
+        th { background: #667eea; color: white; }
+        .present { color: #4CAF50; font-weight: bold; }
+        .absent { color: #f44336; font-weight: bold; }
+        @media (max-width: 768px) { .header { flex-direction: column; gap: 10px; } table { font-size: 12px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 لوحة الطالب</h1>
+            <button class="logout-btn" onclick="logout()">تسجيل خروج</button>
+        </div>
+        <div class="card">
+            <h2>📅 تسجيل الحضور والغياب اليومي</h2>
+            <button class="attendance-btn" onclick="markAttendance('present')">✅ تسجيل حضور</button>
+            <button class="attendance-btn absent-btn" onclick="markAttendance('absent')">❌ تسجيل غياب</button>
+            <textarea id="note" class="note-input" placeholder="ملاحظة (اختياري)" rows="2"></textarea>
+            <div id="message" style="margin-top: 10px; padding: 10px; border-radius: 8px;"></div>
+        </div>
+        <div class="card">
+            <h2>📊 تقرير الحضور والغياب</h2>
+            <table id="attendanceTable">
+                <thead>
+                    <tr><th>التاريخ</th><th>الحالة</th><th>الملاحظة</th></tr>
+                </thead>
+                <tbody id="attendanceBody"></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        const token = localStorage.getItem('studentToken');
+        if (!token) window.location.href = '/login-student.html';
+        const student = JSON.parse(localStorage.getItem('studentData') || '{}');
+
+        async function markAttendance(status) {
+            const note = document.getElementById('note').value;
+            const today = new Date().toISOString().split('T')[0];
+            const response = await fetch('/api/attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ studentId: student.id, status, date: today, note })
+            });
+            const data = await response.json();
+            const msgDiv = document.getElementById('message');
+            if (data.success) {
+                msgDiv.style.background = '#4CAF5010';
+                msgDiv.style.color = '#4CAF50';
+                msgDiv.innerHTML = '✅ ' + data.message;
+                loadReport();
+            } else {
+                msgDiv.style.background = '#f4433610';
+                msgDiv.style.color = '#f44336';
+                msgDiv.innerHTML = '❌ ' + data.error;
+            }
+            setTimeout(() => msgDiv.innerHTML = '', 3000);
+        }
+
+        async function loadReport() {
+            const response = await fetch(`/api/student/${student.id}/report`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (data.success) {
+                const tbody = document.getElementById('attendanceBody');
+                tbody.innerHTML = '';
+                data.reports.forEach(r => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = r.date;
+                    row.insertCell(1).innerHTML = `<span class="${r.status}">${r.status === 'present' ? '✅ حضور' : '❌ غياب'}</span>`;
+                    row.insertCell(2).innerHTML = r.note || '-';
+                });
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('studentToken');
+            localStorage.removeItem('studentData');
+            window.location.href = '/login-student.html';
+        }
+
+        loadReport();
+    </script>
+</body>
+</html>
