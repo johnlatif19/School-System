@@ -72,10 +72,22 @@ async function loadStudent() {
 }
 if (student.status === 'dismissed') {
     document.body.innerHTML = `
-        <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
-            ❌ تم فصل الطالب من المدرسة
-        </div>
-    `;
+    <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
+        ❌ تم فصل الطالب من المدرسة
+        <br><br>
+        <button onclick="logout()" style="
+            padding:10px 20px;
+            font-size:18px;
+            background:#e74c3c;
+            color:white;
+            border:none;
+            border-radius:10px;
+            cursor:pointer;
+        ">
+            تسجيل خروج
+        </button>
+    </div>
+`;
 }
         
 // ✅ مرحبا بالاسم
@@ -105,6 +117,7 @@ document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.na
         }
 
         loadStudent().then(() => loadReport());
+        setInterval(fetchData, 5000);
     </script>
 </body>
 </html>
