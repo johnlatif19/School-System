@@ -131,14 +131,14 @@ app.post('/api/parent/register', async (req, res) => {
 
 // ============= API تسجيل دخول ولي أمر =============
 app.post('/api/parent/login', async (req, res) => {
-  const { email, password } = req.body;
-  const parentDoc = await db.collection('parents').doc(email).get();
+  const { phone, password } = req.body;
+  const parentDoc = await db.collection('parents').doc(phone).get();
   if (!parentDoc.exists) return res.status(401).json({ error: 'بيانات غير صحيحة' });
   const parent = parentDoc.data();
   const valid = await bcrypt.compare(password, parent.password);
   if (!valid) return res.status(401).json({ error: 'بيانات غير صحيحة' });
-  const token = jwt.sign({ id: email, role: 'parent', name: parent.name }, process.env.JWT_SECRET, { expiresIn: '7d' });
-  res.json({ success: true, token, parent: { email, name: parent.name, studentIds: parent.studentIds } });
+  const token = jwt.sign({ id: phone, role: 'parent', name: parent.name }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  res.json({ success: true, token, parent: { phone, name: parent.name, studentIds: parent.studentIds } });
 });
 
 // ============= API دخول الأدمن =============
