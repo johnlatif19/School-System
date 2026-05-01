@@ -105,28 +105,50 @@ app.post('/api/student/login', async (req, res) => {
 });
 
 // ============= API تسجيل حضور/غياب =============
+// ============= API تسجيل حضور/غياب =============
 app.post('/api/attendance', verifyToken, async (req, res) => {
   const { studentId, status, date, note } = req.body;
-  if (req.user.role !== 'student' && req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'غير مصرح' });
+
+  if (!studentId || !status || !date) {
+    return res.status(400).json({ error: 'بيانات ناقصة' });
   }
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'الحضور من الإدارة فقط' });
+  }
+
   try {
     await db.collection('attendance').doc(`${studentId}_${date}`).set({
-      studentId, status, date, note: note || '', recordedBy: req.user.id, timestamp: new Date()
+      studentId,
+      status,
+      date,
+      note: status === 'absent' ? (note || '') : '',
+      recordedBy: req.user.id,
+      timestamp: new Date()
     });
-    // إرسال إشعار لولي الأمر
-    const student = await db.collection('students').doc(studentId).get();
-    const parentData = await db.collection('parents').where('email', '==', student.data().parentPhone).get();
-    if (!parentData.empty) {
-      const parent = parentData.docs[0].data();
+
+    // ✅ جلب الطالب
+    const studentDoc = await db.collection('students').doc(studentId).get();
+    const student = studentDoc.data();
+
+    // ✅ جلب ولي الأمر بالهاتف
+    const parentQuery = await db.collection('parents')
+      .where('phone', '==', student.parentPhone)
+      .get();
+
+    if (!parentQuery.empty) {
+      const parent = parentQuery.docs[0].data();
+
       await transporter.sendMail({
         from: process.env.SMTP_USER,
         to: parent.email,
-        subject: `تسجيل حضور/غياب للطالب ${student.data().name}`,
-        text: `تم تسجيل ${status === 'present' ? 'حضور' : 'غياب'} للطالب ${student.data().name} بتاريخ ${date} ${note ? `ملاحظة: ${note}` : ''}`
+        subject: `حضور/غياب الطالب ${student.name}`,
+        text: `الطالب ${student.name} تم تسجيله ${status === 'present' ? 'حاضر' : 'غائب'} بتاريخ ${date} ${note ? `\nملاحظة: ${note}` : ''}`
       });
     }
+
     res.json({ success: true, message: 'تم تسجيل الحضور/الغياب' });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
