@@ -59,18 +59,6 @@ async function loadStudent() {
 
         // لو مفصول
         if (student.status === 'dismissed') {
-            document.body.innerHTML = `
-                <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
-                    ❌ تم فصل الطالب من المدرسة
-                </div>
-            `;
-            return;
-        }
-
-        document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.name}`;
-    }
-}
-if (student.status === 'dismissed') {
     document.body.innerHTML = `
     <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
         ❌ تم فصل الطالب من المدرسة
@@ -87,7 +75,12 @@ if (student.status === 'dismissed') {
             تسجيل خروج
         </button>
     </div>
-`;
+            `;
+            return;
+        }
+
+        document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.name}`;
+    }
 }
         
 // ✅ مرحبا بالاسم
