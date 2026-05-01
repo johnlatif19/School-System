@@ -58,17 +58,17 @@ async function loadStudent() {
         document.querySelector('.header h1').innerHTML =
             `🎓 مرحباً ${student.name}`;
 
-        if (student.status === 'dismissed') {
-            document.body.innerHTML = `
-                <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
-                    ❌ تم فصل الطالب من المدرسة
-                    <br><br>
-                    <button onclick="logout()" style="padding:10px 20px;background:#e74c3c;color:white;border:none;border-radius:10px">
-                        تسجيل خروج
-                    </button>
-                </div>
-            `;
-        }
+if (student.status === 'dismissed') {
+    document.body.innerHTML = `
+        <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
+            ❌ تم فصل الطالب من المدرسة
+            <br><br>
+            <button onclick="logout()" style="padding:10px 20px;background:#e74c3c;color:white;border:none;border-radius:10px">
+                تسجيل خروج
+            </button>
+        </div>
+    `;
+}
     }
 }
 
@@ -108,9 +108,9 @@ loadStudent().then(() => loadReport());
 
 // تحديث تلقائي
 setInterval(() => {
-    loadStudent();   // مهم جدًا عشان الفصل/إعادة القيد
+    loadStudent();   // مهم
     loadReport();
-}, 5000);
+}, 3000);
 </script>
 </body>
 </html>
