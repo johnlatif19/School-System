@@ -69,7 +69,8 @@
                    <button onclick="mark('${s.id}','present')">حضور</button>
                    <button onclick="mark('${s.id}','absent')">غياب</button>
                    <button style="background:#e74c3c" onclick="dismiss('${s.id}')">فصل الطالب</button>
-                     `;
+                   <button style="background:#27ae60" onclick="reinstate('${s.id}')">إعادة قيد</button>
+`;
                 });
                 document.getElementById('stats').innerHTML = `<div class="stat-card"><div class="stat-number">${studentsData.students.length}</div><div>عدد الطلاب</div></div>`;
             }
@@ -110,6 +111,26 @@ async function mark(studentId, status) {
     }
 }
 
+
+        async function reinstate(studentId) {
+    const res = await fetch('/api/student/reinstate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ studentId })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        alert('تم إعادة قيد الطالب');
+        fetchData();
+    } else {
+        alert(data.error);
+    }
+}
         async function dismiss(studentId) {
     if (!confirm('هل أنت متأكد من فصل الطالب؟')) return;
 
