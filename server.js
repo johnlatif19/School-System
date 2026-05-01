@@ -153,6 +153,27 @@ app.post('/api/attendance', verifyToken, async (req, res) => {
   }
 });
 
+app.get('/api/student/me', verifyToken, async (req, res) => {
+  try {
+    const studentDoc = await db.collection('students').doc(req.user.id).get();
+
+    if (!studentDoc.exists) {
+      return res.status(404).json({ error: 'الطالب غير موجود' });
+    }
+
+    res.json({
+      success: true,
+      student: {
+        id: studentDoc.id,
+        ...studentDoc.data()
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/student/dismiss', verifyToken, async (req, res) => {
   const { studentId } = req.body;
 
