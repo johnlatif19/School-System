@@ -47,32 +47,13 @@
         </div>
     </div>
     <script>
-        const token = localStorage.getItem('studentToken');
-        if (!token) window.location.href = '/login-student.html';
-        const student = JSON.parse(localStorage.getItem('studentData') || '{}');
+const token = localStorage.getItem('studentToken');
+if (!token) window.location.href = '/login-student.html';
 
-        async function markAttendance(status) {
-            const note = document.getElementById('note').value;
-            const today = new Date().toISOString().split('T')[0];
-            const response = await fetch('/api/attendance', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ studentId: student.id, status, date: today, note })
-            });
-            const data = await response.json();
-            const msgDiv = document.getElementById('message');
-            if (data.success) {
-                msgDiv.style.background = '#4CAF5010';
-                msgDiv.style.color = '#4CAF50';
-                msgDiv.innerHTML = '✅ ' + data.message;
-                loadReport();
-            } else {
-                msgDiv.style.background = '#f4433610';
-                msgDiv.style.color = '#f44336';
-                msgDiv.innerHTML = '❌ ' + data.error;
-            }
-            setTimeout(() => msgDiv.innerHTML = '', 3000);
-        }
+const student = JSON.parse(localStorage.getItem('studentData') || '{}');
+
+// ✅ مرحبا بالاسم
+document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.name || ''}`;
 
         async function loadReport() {
             const response = await fetch(`/api/student/${student.id}/report`, {
@@ -86,7 +67,7 @@
                     const row = tbody.insertRow();
                     row.insertCell(0).innerHTML = r.date;
                     row.insertCell(1).innerHTML = `<span class="${r.status}">${r.status === 'present' ? '✅ حضور' : '❌ غياب'}</span>`;
-                    row.insertCell(2).innerHTML = r.note || '-';
+                    row.insertCell(2).innerHTML = r.status === 'absent' ? (r.note || '-') : '-';
                 });
             }
         }
