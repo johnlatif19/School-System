@@ -116,7 +116,7 @@ app.post('/api/attendance', verifyToken, async (req, res) => {
     });
     // إرسال إشعار لولي الأمر
     const student = await db.collection('students').doc(studentId).get();
-    const parentData = await db.collection('parents').where('email', '==', student.data().parentEmail).get();
+    const parentData = await db.collection('parents').where('email', '==', student.data().parentPhone).get();
     if (!parentData.empty) {
       const parent = parentData.docs[0].data();
       await transporter.sendMail({
