@@ -56,7 +56,7 @@ app.post('/api/student/register', async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
     await db.collection('students').doc(studentId).set({
-      name, email, password, className, parentPhone,
+      name, email, password: hashedPassword, className, parentPhone,
       createdAt: new Date()
     });
     res.json({ success: true, message: 'تم إنشاء حساب الطالب' });
@@ -120,7 +120,7 @@ app.post('/api/parent/register', async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
     await db.collection('parents').doc(email).set({
-      email, password, name, phone, studentIds, createdAt: new Date()
+      email, password: hashedPassword, name, phone, studentIds, createdAt: new Date()
     });
     res.json({ success: true, message: 'تم إنشاء حساب ولي الأمر' });
   } catch (error) {
