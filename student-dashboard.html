@@ -43,8 +43,33 @@
 const token = localStorage.getItem('studentToken');
 if (!token) window.location.href = '/login-student.html';
 
-const student = JSON.parse(localStorage.getItem('studentData') || '{}');
+let student = {};
 
+async function loadStudent() {
+    const res = await fetch('/api/student/me', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        student = data.student;
+
+        // لو مفصول
+        if (student.status === 'dismissed') {
+            document.body.innerHTML = `
+                <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
+                    ❌ تم فصل الطالب من المدرسة
+                </div>
+            `;
+            return;
+        }
+
+        document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.name}`;
+    }
+}
 if (student.status === 'dismissed') {
     document.body.innerHTML = `
         <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
@@ -79,7 +104,7 @@ document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.na
             window.location.href = '/login-student.html';
         }
 
-        loadReport();
+        loadStudent().then(() => loadReport());
     </script>
 </body>
 </html>
