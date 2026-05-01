@@ -57,6 +57,12 @@
                     row.insertCell(1).innerHTML = s.name;
                     row.insertCell(2).innerHTML = s.email;
                     row.insertCell(3).innerHTML = s.className;
+
+const actions = row.insertCell(4);
+actions.innerHTML = `
+<button onclick="mark('${s.id}','present')">حضور</button>
+<button onclick="mark('${s.id}','absent')">غياب</button>
+`;
                 });
                 document.getElementById('stats').innerHTML = `<div class="stat-card"><div class="stat-number">${studentsData.students.length}</div><div>عدد الطلاب</div></div>`;
             }
@@ -74,8 +80,32 @@
                 });
             }
         }
+
+async function mark(studentId, status) {
+    const note = status === 'absent' ? prompt('اكتب ملاحظة (اختياري):') : '';
+    const today = new Date().toISOString().split('T')[0];
+
+    const res = await fetch('/api/attendance', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ studentId, status, date: today, note })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        fetchData(); // تحديث تلقائي
+    } else {
+        alert(data.error);
+    }
+}
+        
         function logout() { localStorage.removeItem('adminToken'); window.location.href = '/admin-login.html'; }
         fetchData();
+        setInterval(fetchData, 5000);
     </script>
 </body>
 </html>
