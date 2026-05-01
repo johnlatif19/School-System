@@ -105,7 +105,6 @@ app.post('/api/student/login', async (req, res) => {
 });
 
 // ============= API تسجيل حضور/غياب =============
-// ============= API تسجيل حضور/غياب =============
 app.post('/api/attendance', verifyToken, async (req, res) => {
   const { studentId, status, date, note } = req.body;
 
@@ -148,6 +147,50 @@ app.post('/api/attendance', verifyToken, async (req, res) => {
     }
 
     res.json({ success: true, message: 'تم تسجيل الحضور/الغياب' });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/student/dismiss', verifyToken, async (req, res) => {
+  const { studentId } = req.body;
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'غير مصرح' });
+  }
+
+  try {
+    const studentDoc = await db.collection('students').doc(studentId).get();
+
+    if (!studentDoc.exists) {
+      return res.status(404).json({ error: 'الطالب غير موجود' });
+    }
+
+    const student = studentDoc.data();
+
+    // إرسال إيميل فصل
+    const parentQuery = await db.collection('parents')
+      .where('phone', '==', student.parentPhone)
+      .get();
+
+    if (!parentQuery.empty) {
+      const parent = parentQuery.docs[0].data();
+
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: parent.email,
+        subject: `قرار فصل الطالب ${student.name}`,
+        text: `تم فصل الطالب ${student.name} من المدرسة`
+      });
+    }
+
+    // تحديث حالة الطالب
+    await db.collection('students').doc(studentId).update({
+      status: 'dismissed'
+    });
+
+    res.json({ success: true, message: 'تم فصل الطالب' });
 
   } catch (error) {
     res.status(500).json({ error: error.message });
