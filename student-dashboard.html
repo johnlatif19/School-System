@@ -45,6 +45,14 @@ if (!token) window.location.href = '/login-student.html';
 
 const student = JSON.parse(localStorage.getItem('studentData') || '{}');
 
+if (student.status === 'dismissed') {
+    document.body.innerHTML = `
+        <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
+            ❌ تم فصل الطالب من المدرسة
+        </div>
+    `;
+}
+        
 // ✅ مرحبا بالاسم
 document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.name || ''}`;
 
