@@ -39,7 +39,7 @@
             </table>
         </div>
     </div>
-    <script>
+<script>
 const token = localStorage.getItem('studentToken');
 if (!token) window.location.href = '/login-student.html';
 
@@ -47,9 +47,7 @@ let student = {};
 
 async function loadStudent() {
     const res = await fetch('/api/student/me', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
     });
 
     const data = await res.json();
@@ -57,65 +55,62 @@ async function loadStudent() {
     if (data.success) {
         student = data.student;
 
-        // لو مفصول
-        if (student.status === 'dismissed') {
-    document.body.innerHTML = `
-    <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
-        ❌ تم فصل الطالب من المدرسة
-        <br><br>
-        <button onclick="logout()" style="
-            padding:10px 20px;
-            font-size:18px;
-            background:#e74c3c;
-            color:white;
-            border:none;
-            border-radius:10px;
-            cursor:pointer;
-        ">
-            تسجيل خروج
-        </button>
-    </div>
-            `;
-            return;
-        }
+        document.querySelector('.header h1').innerHTML =
+            `🎓 مرحباً ${student.name}`;
 
-        document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.name}`;
+        if (student.status === 'dismissed') {
+            document.body.innerHTML = `
+                <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
+                    ❌ تم فصل الطالب من المدرسة
+                    <br><br>
+                    <button onclick="logout()" style="padding:10px 20px;background:#e74c3c;color:white;border:none;border-radius:10px">
+                        تسجيل خروج
+                    </button>
+                </div>
+            `;
+        }
     }
 }
-        
-// ✅ مرحبا بالاسم
-document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.name || ''}`;
 
-        async function loadReport() {
-            const response = await fetch(`/api/student/${student.id}/report`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (data.success) {
-                const tbody = document.getElementById('attendanceBody');
-                tbody.innerHTML = '';
-                data.reports.forEach(r => {
-                    const row = tbody.insertRow();
-                    row.insertCell(0).innerHTML = r.date;
-                    row.insertCell(1).innerHTML = `<span class="${r.status}">${r.status === 'present' ? '✅ حضور' : '❌ غياب'}</span>`;
-                    row.insertCell(2).innerHTML = (r.status === 'absent' && r.note) ? r.note : '-';
-                });
-            }
-        }
+async function loadReport() {
+    const response = await fetch(`/api/student/${student.id}/report`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
 
-        function logout() {
-            localStorage.removeItem('studentToken');
-            localStorage.removeItem('studentData');
-            window.location.href = '/login-student.html';
-        }
+    const data = await response.json();
 
-loadStudent().then(() => {
-    loadReport();
-});
+    if (data.success) {
+        const tbody = document.getElementById('attendanceBody');
+        tbody.innerHTML = '';
 
+        data.reports.forEach(r => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerHTML = r.date;
+            row.insertCell(1).innerHTML =
+                `<span class="${r.status}">
+                ${r.status === 'present' ? '✅ حضور' : '❌ غياب'}
+                </span>`;
+
+            row.insertCell(2).innerHTML =
+                (r.status === 'absent' && r.note) ? r.note : '-';
+        });
+    }
+}
+
+function logout() {
+    localStorage.removeItem('studentToken');
+    localStorage.removeItem('studentData');
+    window.location.href = '/login-student.html';
+}
+
+// أول تحميل
+loadStudent().then(() => loadReport());
+
+// تحديث تلقائي
 setInterval(() => {
+    loadStudent();   // مهم جدًا عشان الفصل/إعادة القيد
     loadReport();
 }, 5000);
-    </script>
+</script>
 </body>
 </html>
