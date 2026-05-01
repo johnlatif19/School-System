@@ -109,8 +109,13 @@ document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.na
             window.location.href = '/login-student.html';
         }
 
-        loadStudent().then(() => loadReport());
-        setInterval(fetchData, 5000);
+loadStudent().then(() => {
+    loadReport();
+});
+
+setInterval(() => {
+    loadReport();
+}, 5000);
     </script>
 </body>
 </html>
