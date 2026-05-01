@@ -60,7 +60,7 @@ document.querySelector('.header h1').innerHTML = `🎓 مرحباً ${student.na
                     const row = tbody.insertRow();
                     row.insertCell(0).innerHTML = r.date;
                     row.insertCell(1).innerHTML = `<span class="${r.status}">${r.status === 'present' ? '✅ حضور' : '❌ غياب'}</span>`;
-                    row.insertCell(2).innerHTML = r.status === 'absent' ? (r.note || '-') : '-';
+                    row.insertCell(2).innerHTML = (r.status === 'absent' && r.note) ? r.note : '-';
                 });
             }
         }
