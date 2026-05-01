@@ -68,12 +68,40 @@ app.post('/api/student/register', async (req, res) => {
 // ============= API تسجيل دخول طالب =============
 app.post('/api/student/login', async (req, res) => {
   const { studentId, password } = req.body;
-  const studentDoc = await db.collection('students').doc(studentId).get();
-  if (!studentDoc.exists) return res.status(401).json({ error: 'بيانات غير صحيحة' });
-  const student = studentDoc.data();
-  const valid = await bcrypt.compare(password, student.password);
-  if (!valid) return res.status(401).json({ error: 'بيانات غير صحيحة' });
-  const token = jwt.sign({ id: studentId, role: 'student', name: student.name }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+  try {
+    const studentDoc = await db.collection('students').doc(studentId).get();
+
+    if (!studentDoc.exists) {
+      return res.status(401).json({ error: 'بيانات غير صحيحة' });
+    }
+
+    const student = studentDoc.data();
+    const valid = await bcrypt.compare(password, student.password);
+
+    if (!valid) {
+      return res.status(401).json({ error: 'بيانات غير صحيحة' });
+    }
+
+    const token = jwt.sign(
+      { id: studentId, role: 'student', name: student.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      student: {
+        id: studentId,
+        name: student.name,
+        className: student.className
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // ============= API تسجيل حضور/غياب =============
