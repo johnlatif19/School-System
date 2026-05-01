@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة ولي الأمر - نظام المدرسة</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
+        .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; }
+        h2 { color: #333; margin-bottom: 20px; border-right: 4px solid #667eea; padding-right: 15px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #ddd; }
+        th { background: #667eea; color: white; }
+        .present { color: #4CAF50; font-weight: bold; }
+        .absent { color: #f44336; font-weight: bold; }
+        select { padding: 10px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ddd; width: 100%; max-width: 300px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👪 لوحة ولي الأمر</h1>
+            <button class="logout-btn" onclick="logout()">تسجيل خروج</button>
+        </div>
+        <div class="card">
+            <h2>📊 متابعة حضور وغياب الأبناء</h2>
+            <select id="studentSelect" onchange="loadReport()"></select>
+            <table id="reportTable"><thead><tr><th>التاريخ</th><th>الحالة</th><th>الملاحظة</th></tr></thead><tbody id="reportBody"></tbody></table>
+        </div>
+    </div>
+    <script>
+        const token = localStorage.getItem('parentToken');
+        if (!token) window.location.href = '/login-parent.html';
+        const parent = JSON.parse(localStorage.getItem('parentData') || '{}');
+
+        async function loadStudents() {
+            const select = document.getElementById('studentSelect');
+            select.innerHTML = '';
+            for (let studentId of parent.studentIds) {
+                const response = await fetch(`/api/student/${studentId}/report`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await response.json();
+                if (data.success) {
+                    const option = document.createElement('option');
+                    option.value = studentId;
+                    option.textContent = `الطالب ${studentId}`;
+                    select.appendChild(option);
+                }
+            }
+            if (parent.studentIds.length > 0) loadReport();
+        }
+
+        async function loadReport() {
+            const studentId = document.getElementById('studentSelect').value;
+            if (!studentId) return;
+            const response = await fetch(`/api/student/${studentId}/report`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await response.json();
+            if (data.success) {
+                const tbody = document.getElementById('reportBody');
+                tbody.innerHTML = '';
+                data.reports.forEach(r => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerHTML = r.date;
+                    row.insertCell(1).innerHTML = `<span class="${r.status}">${r.status === 'present' ? '✅ حضور' : '❌ غياب'}</span>`;
+                    row.insertCell(2).innerHTML = r.note || '-';
+                });
+            }
+        }
+
+        function logout() { localStorage.removeItem('parentToken'); localStorage.removeItem('parentData'); window.location.href = '/login-parent.html'; }
+        loadStudents();
+    </script>
+</body>
+</html>
