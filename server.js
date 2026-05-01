@@ -154,43 +154,31 @@ app.post('/api/attendance', verifyToken, async (req, res) => {
 });
 
 app.post('/api/student/reinstate', verifyToken, async (req, res) => {
-  const { studentId } = req.body;
-
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'غير مصرح' });
   }
 
   try {
-    const studentRef = db.collection('students').doc(studentId);
-    const studentDoc = await studentRef.get();
+    const { studentId } = req.body;
 
-    if (!studentDoc.exists) {
-      return res.status(404).json({ error: 'الطالب غير موجود' });
-    }
-
-    const student = studentDoc.data();
-
-    await studentRef.update({
+    await db.collection('students').doc(studentId).update({
       status: 'active'
     });
 
-    // إرسال إيميل إعادة القيد
-    const parentQuery = await db.collection('parents')
-      .where('phone', '==', student.parentPhone)
-      .get();
+    const student = await db.collection('students').doc(studentId).get();
 
-    if (!parentQuery.empty) {
-      const parent = parentQuery.docs[0].data();
+    if (student.exists) {
+      const data = student.data();
 
       await transporter.sendMail({
         from: process.env.SMTP_USER,
-        to: parent.email,
-        subject: `إعادة قيد الطالب ${student.name}`,
-        text: `تم إعادة قيد الطالب ${student.name} وعودته للمدرسة`
+        to: data.email,
+        subject: 'إعادة قيد الطالب',
+        text: `تم إعادة قيد الطالب ${data.name} في المدرسة`
       });
     }
 
-    res.json({ success: true, message: 'تم إعادة قيد الطالب' });
+    res.json({ success: true });
 
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -223,49 +211,37 @@ app.get('/api/student/me', verifyToken, async (req, res) => {
 });
 
 app.post('/api/student/dismiss', verifyToken, async (req, res) => {
-  const { studentId } = req.body;
-
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'غير مصرح' });
   }
 
   try {
-    const studentDoc = await db.collection('students').doc(studentId).get();
+    const { studentId } = req.body;
 
-    if (!studentDoc.exists) {
-      return res.status(404).json({ error: 'الطالب غير موجود' });
-    }
-
-    const student = studentDoc.data();
-
-    // إرسال إيميل فصل
-    const parentQuery = await db.collection('parents')
-      .where('phone', '==', student.parentPhone)
-      .get();
-
-    if (!parentQuery.empty) {
-      const parent = parentQuery.docs[0].data();
-
-      await transporter.sendMail({
-        from: process.env.SMTP_USER,
-        to: parent.email,
-        subject: `قرار فصل الطالب ${student.name}`,
-        text: `تم فصل الطالب ${student.name} من المدرسة`
-      });
-    }
-
-    // تحديث حالة الطالب
     await db.collection('students').doc(studentId).update({
       status: 'dismissed'
     });
 
-    res.json({ success: true, message: 'تم فصل الطالب' });
+    // إرسال ايميل
+    const student = await db.collection('students').doc(studentId).get();
+
+    if (student.exists) {
+      const data = student.data();
+
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: data.email,
+        subject: 'تم فصل الطالب من المدرسة',
+        text: `تم فصل الطالب ${data.name} من المدرسة`
+      });
+    }
+
+    res.json({ success: true });
 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-
 // ============= API جلب تقرير الطالب =============
 app.get('/api/student/:id/report', verifyToken, async (req, res) => {
   if (req.user.id !== req.params.id && req.user.role !== 'parent' && req.user.role !== 'admin') {
