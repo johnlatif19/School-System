@@ -56,7 +56,7 @@ app.post('/api/student/register', async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
     await db.collection('students').doc(studentId).set({
-      
+      name, email, password, className, parentPhone,
       createdAt: new Date()
     });
     res.json({ success: true, message: 'تم إنشاء حساب الطالب' });
@@ -74,7 +74,6 @@ app.post('/api/student/login', async (req, res) => {
   const valid = await bcrypt.compare(password, student.password);
   if (!valid) return res.status(401).json({ error: 'بيانات غير صحيحة' });
   const token = jwt.sign({ id: studentId, role: 'student', name: student.name }, process.env.JWT_SECRET, { expiresIn: '7d' });
-  res.json({ success: true, token, student: { id: studentIdname, email, password, className, parentPhone,, name: student.name, className: student.className } });
 });
 
 // ============= API تسجيل حضور/غياب =============
