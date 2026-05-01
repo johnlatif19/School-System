@@ -202,14 +202,18 @@ app.get('/api/student/me', verifyToken, async (req, res) => {
     const studentDoc = await db.collection('students').doc(req.user.id).get();
 
     if (!studentDoc.exists) {
-      return res.status(404).json({ error: 'الطالب غير موجود' });
+      return res.status(404).json({ error: 'غير موجود' });
     }
+
+    const student = studentDoc.data();
 
     res.json({
       success: true,
       student: {
-        id: studentDoc.id,
-        ...studentDoc.data()
+        id: req.user.id,
+        name: student.name,
+        className: student.className,
+        status: student.status || 'active'
       }
     });
 
