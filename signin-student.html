@@ -20,12 +20,12 @@
 <body>
     <div class="signup-card">
         <h1>📝 إنشاء حساب طالب</h1>
-        <input type="text" id="studentId" placeholder="الرقم التعريفي للطالب" required>
+        <input type="text" id="studentId" placeholder="الرقم القومي للطالب" required>
         <input type="text" id="name" placeholder="الاسم الكامل" required>
         <input type="email" id="email" placeholder="البريد الإلكتروني" required>
         <input type="password" id="password" placeholder="كلمة المرور" required>
-        <input type="text" id="className" placeholder="الصف الدراسي (مثال: 3ث/علمي)" required>
-        <input type="email" id="parentEmail" placeholder="البريد الإلكتروني لولي الأمر" required>
+        <input type="text" id="className" placeholder="الصف الدراسي" required>
+        <input type="phone" id="parentPhone" placeholder="رقم الهاتف لولي الأمر" required>
         <button onclick="registerStudent()">إنشاء حساب</button>
         <div class="login-link">لديك حساب بالفعل؟ <a href="/login-student.html">تسجيل دخول</a></div>
         <div id="message" class="message"></div>
@@ -38,7 +38,7 @@
                 email: document.getElementById('email').value,
                 password: document.getElementById('password').value,
                 className: document.getElementById('className').value,
-                parentEmail: document.getElementById('parentEmail').value
+                parentPhone: document.getElementById('parentPhone').value
             };
             const response = await fetch('/api/student/register', {
                 method: 'POST',
