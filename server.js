@@ -326,6 +326,14 @@ app.put('/api/admin/student/:id', verifyToken, async (req, res) => {
 
   try {
     const studentId = req.params.id;
+
+    const docRef = db.collection('students').doc(studentId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: 'الطالب غير موجود' });
+    }
+
     const {
       nationalId,
       name,
@@ -335,20 +343,19 @@ app.put('/api/admin/student/:id', verifyToken, async (req, res) => {
       parentPhone
     } = req.body;
 
-    const updateData = {
-      nationalId,
-      name,
-      email,
-      className,
-      parentPhone
-    };
+    const updateData = {};
 
-    // لو تم تغيير الباسورد
-    if (password) {
+    if (nationalId !== undefined) updateData.nationalId = nationalId;
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (className !== undefined) updateData.className = className;
+    if (parentPhone !== undefined) updateData.parentPhone = parentPhone;
+
+    if (password && password.trim() !== '') {
       updateData.password = await bcrypt.hash(password, 10);
     }
 
-    await db.collection('students').doc(studentId).update(updateData);
+    await docRef.update(updateData);
 
     res.json({ success: true, message: 'تم تحديث بيانات الطالب' });
 
