@@ -24,13 +24,6 @@
     </style>
 </head>
 <body>
-    <div id="dismissedScreen" style="display:none;text-align:center;margin-top:100px;color:white;font-size:30px">
-    ❌ تم فصل الطالب من المدرسة
-    <br><br>
-    <button onclick="logout()" style="padding:10px 20px;background:#e74c3c;color:white;border:none;border-radius:10px">
-        تسجيل خروج
-    </button>
-    </div>
     <div class="container">
         <div class="header">
             <h1>🎓 لوحة الطالب</h1>
@@ -65,14 +58,16 @@ async function loadStudent() {
         document.querySelector('.header h1').innerHTML =
             `🎓 مرحباً ${student.name}`;
 
-        const dismissedScreen = document.getElementById('dismissedScreen');
-
         if (student.status === 'dismissed') {
-            dismissedScreen.style.display = 'block';
-            document.querySelector('.container').style.display = 'none';
-        } else {
-            dismissedScreen.style.display = 'none';
-            document.querySelector('.container').style.display = 'block';
+            document.body.innerHTML = `
+                <div style="text-align:center;margin-top:100px;color:white;font-size:30px">
+                    ❌ تم فصل الطالب من المدرسة
+                    <br><br>
+                    <button onclick="logout()" style="padding:10px 20px;background:#e74c3c;color:white;border:none;border-radius:10px">
+                        تسجيل خروج
+                    </button>
+                </div>
+            `;
         }
     }
 }
