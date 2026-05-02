@@ -335,7 +335,7 @@ app.put('/api/admin/student/:id', verifyToken, async (req, res) => {
     }
 
     const {
-      nationalId,
+      studentId,
       name,
       email,
       password,
@@ -345,7 +345,7 @@ app.put('/api/admin/student/:id', verifyToken, async (req, res) => {
 
     const updateData = {};
 
-    if (nationalId !== undefined) updateData.nationalId = nationalId;
+    if (studentId !== undefined) updateData.studentId = studentId;
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
     if (className !== undefined) updateData.className = className;
