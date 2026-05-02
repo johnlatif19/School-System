@@ -384,7 +384,7 @@ app.get('/api/admin/attendance', verifyToken, async (req, res) => {
 });
 
 app.get('/api/test', (req, res) => {
-  res.json({ ok: true, message: "server is working" });
+  res.json({ success: true, message: "API works" });
 });
 
 // بدء الخادم
