@@ -327,7 +327,7 @@ app.put('/api/admin/student/:id', verifyToken, async (req, res) => {
   try {
     const paramStudentId = req.params.id;
 
-    const docRef = db.collection('students').doc(studentId);
+    const docRef = db.collection('students').doc(req.params.id);
     const doc = await docRef.get();
 
     if (!doc.exists) {
