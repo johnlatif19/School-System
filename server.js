@@ -13,9 +13,12 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 // تهيئة Firebase
-const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
 admin.initializeApp({
-  credential: admin.credential.cert(firebaseConfig)
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+  })
 });
 const db = admin.firestore();
 
