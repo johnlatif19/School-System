@@ -29,7 +29,7 @@
     <div id="editBox" style="display:none;position:fixed;top:10%;right:10%;left:10%;background:white;padding:20px;border-radius:15px;box-shadow:0 0 20px rgba(0,0,0,0.3)">
     <h2>تعديل بيانات الطالب</h2>
 
-    <input id="nationalId" placeholder="الرقم القومي"><br>
+    <input id="studentId" placeholder="الرقم القومي"><br>
     <input id="name" placeholder="الاسم الكامل"><br>
     <input id="email" placeholder="البريد الإلكتروني"><br>
     <input id="password" placeholder="كلمة المرور (اختياري)"><br>
@@ -182,7 +182,7 @@ async function openEdit(id) {
 
     if (!student) return;
 
-    document.getElementById('studentId').value = student.studentId || '';
+    document.getElementById('studentId').value = student.id;
     document.getElementById('name').value = student.name || '';
     document.getElementById('email').value = student.email || '';
     document.getElementById('className').value = student.className || '';
