@@ -20,12 +20,27 @@
 <body>
     <div class="signup-card">
         <h1>📝 إنشاء حساب طالب</h1>
-        <input type="text" id="studentId" placeholder="الرقم القومي للطالب" required>
+        <input type="tel" id="studentId" placeholder="الرقم القومي للطالب" required>
         <input type="text" id="name" placeholder="الاسم الكامل" required>
         <input type="email" id="email" placeholder="البريد الإلكتروني" required>
         <input type="password" id="password" placeholder="كلمة المرور" required>
-        <input type="text" id="className" placeholder="الصف الدراسي" required>
-        <input type="phone" id="parentPhone" placeholder="رقم الهاتف لولي الأمر" required>
+        <label for="className">الصف الدراسي:</label>
+<select id="className" required>
+  <option value="">اختر الصف</option>
+  <option value="1">الصف الأول الابتدائي</option>
+  <option value="2">الصف الثاني الابتدائي</option>
+  <option value="3">الصف الثالث الابتدائي</option>
+  <option value="4">الصف الرابع الابتدائي</option>
+  <option value="5">الصف الخامس الابتدائي</option>
+  <option value="6">الصف السادس الابتدائي</option>
+  <option value="7">الصف الاول الاعدادي</option>
+  <option value="8">الصف الثاني الاعدادي</option>
+  <option value="9">الصف الثالث الاعدادي</option>
+  <option value="10">الصف الاول الثانوي</option>
+  <option value="11">الصف الثاني الثانوي</option>
+  <option value="12">الصف الثالث الثانوي</option>
+</select>
+        <input type="tel" id="parentPhone" placeholder="رقم الهاتف لولي الأمر" required>
         <button onclick="registerStudent()">إنشاء حساب</button>
         <div class="login-link">لديك حساب بالفعل؟ <a href="/login-student.html">تسجيل دخول</a></div>
         <div id="message" class="message"></div>
