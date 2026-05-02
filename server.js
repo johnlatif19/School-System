@@ -383,6 +383,10 @@ app.get('/api/admin/attendance', verifyToken, async (req, res) => {
   res.json({ success: true, attendance: list });
 });
 
+app.get('/api/test', (req, res) => {
+  res.json({ ok: true, message: "server is working" });
+});
+
 // بدء الخادم
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
