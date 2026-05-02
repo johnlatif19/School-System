@@ -81,9 +81,8 @@
                 const actions = row.insertCell(4);
                  actions.innerHTML = `
                    <button onclick="mark('${s.id}','present')">حضور</button>
-                   <button onclick="mark('${s.id}','absent')">غياب</button>
-                   <button onclick="mark('${s.id}','present')">حضور</button>
-                   <button style="background:#f39c12" onclick="openEdit('${s.id}')">تعديل</button>
+                   <button onclick="mark('${s.id}','absent')">غياب</button>         
+                    <button style="background:#f39c12" onclick="openEdit('${s.id}')">تعديل</button>
                    <button style="background:#e74c3c" onclick="dismiss('${s.id}')">فصل الطالب</button>
                    <button style="background:#27ae60" onclick="reinstate('${s.id}')">إعادة قيد</button>
 `;
