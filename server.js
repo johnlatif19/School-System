@@ -328,7 +328,7 @@ app.put('/api/admin/student/:id', verifyToken, async (req, res) => {
   }
 
   try {
-    const studentId = req.params.id;
+    const paramStudentId = req.params.id;
 
     const docRef = db.collection('students').doc(studentId);
     const doc = await docRef.get();
