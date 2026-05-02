@@ -183,7 +183,7 @@ async function openEdit(id) {
 
     if (!student) return;
 
-    document.getElementById('nationalId').value = student.nationalId || '';
+    document.getElementById('studentId').value = student.studentId || '';
     document.getElementById('name').value = student.name || '';
     document.getElementById('email').value = student.email || '';
     document.getElementById('className').value = student.className || '';
@@ -198,7 +198,7 @@ function closeEdit() {
 
 async function saveEdit() {
     const body = {
-        nationalId: document.getElementById('nationalId').value,
+        studentId: document.getElementById('studentId').value,
         name: document.getElementById('name').value,
         email: document.getElementById('email').value,
         password: document.getElementById('password').value,
